@@ -1,0 +1,137 @@
+#set($layout = "/templates/home/layout/default.vm")
+<div class="container-body">
+
+<button class="layui-btn layui-btn-warm" style="margin-left:5px" id="return">返回</button>
+
+<form class="layui-form">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>查看</legend>
+    </fieldset>
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">编号</label>
+            <div class="layui-input-block">
+                <input type="text" value="$!pchomead.id" readonly="readonly"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">图片地址</label>
+            <div class="layui-input-block">
+                <input type="text" value="$!pchomead.imageUrl" readonly="readonly"
+                       class="layui-input" id="imageUrl">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="button" class="layui-btn" id="imageUrlPreviewBtn" onclick="previewModuleUrl('imageUrl', 'imageUrlPreviewDiv', this)">图片预览</button>
+            </div>
+        </div>
+        <div class="layui-form-item" id="imageUrlPreviewDiv" style="display:none;">
+            <label class="layui-form-label">图片预览</label>
+            <div class="layui-input-block">
+                <img/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">链接地址</label>
+            <div class="layui-input-block">
+                <input type="text" value="$!pchomead.linkUrl" readonly="readonly"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">描述</label>
+            <div class="layui-input-block">
+                <input type="text" value="$!pchomead.remark" readonly="readonly"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                #if($!pchomead.status == "0")
+                    <input type="text" value="正常(在线)" readonly="readonly" class="layui-input">
+                #elseif($!pchomead.status == "1")
+                    <input type="text" value="已下线" readonly="readonly" class="layui-input">
+                #else
+                    <input type="text" value="$!pchomead.status" readonly="readonly" class="layui-input">
+                #end
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">开始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="$tool.formatDate($!pchomead.gmtStart)" readonly="readonly"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">结束时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="$tool.formatDate($!pchomead.gmtEnd)" readonly="readonly"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">最后操作人</label>
+            <div class="layui-input-block">
+                <input type="text" value="$!pchomead.operator" readonly="readonly"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">创建时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="$tool.formatDate($!pchomead.gmtCreate)" readonly="readonly"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">更新时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="$tool.formatDate($!pchomead.gmtModified)" readonly="readonly"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+    </form>
+</form>
+</div>
+
+<script type="text/javascript">
+    var $, layer;
+    //加载所需模块
+    layui.use('layer', function () {
+        $ = layui.jquery, layer = layui.layer;
+
+        //返回事件
+        $('#return').on('click', function () {
+            window.location = '$!rootContextPath.getURI("/pchomead")';
+        });
+    });
+
+    //图片预览
+    function previewModuleUrl(id, showId, obj) {
+        if($("#"+showId).is(":hidden")) {
+            var img_url = $("#"+id).val() ;
+            if(!isvalid(img_url)) {
+                layer.alert('图片链接为空')
+                return ;
+            }
+//            if(!new RegExp("(.jpg|.JPG|.jpeg|.JPEG|.png|.PNG)$").test(img_url)) {
+//                layer.alert('图片链接为空或格式错误')
+//                return ;
+//            }
+            $("#"+showId).find("img").attr("src", $("#"+id).val());
+            $("#"+showId).show();
+            obj.innerHTML ="取消预览" ;
+        } else {
+            $("#"+showId).hide();
+            obj.innerHTML ="图片预览" ;
+        }
+    }
+</script>

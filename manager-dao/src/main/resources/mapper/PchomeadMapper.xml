@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.server.manager.dao.mysql.mapper.PchomeadMapper">
+  <resultMap id="BaseResultMap" type="com.example.server.manager.dao.mysql.domain.Pchomead">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="image_url" jdbcType="VARCHAR" property="imageUrl" />
+    <result column="link_url" jdbcType="VARCHAR" property="linkUrl" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="is_delete" jdbcType="BIT" property="isDelete" />
+    <result column="gmt_start" jdbcType="TIMESTAMP" property="gmtStart" />
+    <result column="gmt_end" jdbcType="TIMESTAMP" property="gmtEnd" />
+    <result column="operator" jdbcType="VARCHAR" property="operator" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, image_url, link_url, remark, status, gmt_start, gmt_end, operator, gmt_create, gmt_modified
+  </sql>
+  <insert id="insert" parameterType="com.example.server.manager.dao.mysql.domain.Pchomead">
+    insert into pc_home_ad
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        image_url,
+      <if test="linkUrl != null">
+        link_url,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="gmtStart != null">
+        gmt_start,
+      </if>
+      <if test="gmtEnd != null">
+        gmt_end,
+      </if>
+      <if test="operator != null">
+        operator,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+        #{imageUrl,jdbcType=VARCHAR},
+      <if test="linkUrl != null">
+        #{linkUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="gmtStart != null">
+        #{gmtStart,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtEnd != null">
+        #{gmtEnd,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operator != null">
+        #{operator,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from pc_home_ad
+    where id = #{id,jdbcType=BIGINT} and is_delete = 0
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from pc_home_ad where is_delete = 0
+  </select>
+  <select id="selectAllByCondition" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from pc_home_ad where remark like CONCAT('%',#{filterWord,jdbcType=VARCHAR},'%') or id = #{filterWord,jdbcType=BIGINT} and is_delete = 0
+  </select>
+  <update id="updateById" parameterType="com.example.server.manager.dao.mysql.domain.Pchomead">
+    update pc_home_ad
+    <set>
+      <if test="imageUrl != null">
+        image_url = #{imageUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="linkUrl != null">
+        link_url = #{linkUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="gmtStart != null">
+        gmt_start = #{gmtStart,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtEnd != null">
+        gmt_end = #{gmtEnd,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operator != null">
+        operator = #{operator,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateStatusById">
+    update pc_home_ad set status = #{status,jdbcType=INTEGER}, operator = #{operator,jdbcType=VARCHAR} where id = #{id,jdbcType=BIGINT}
+  </update>
+  <delete id="deleteById">
+    update pc_home_ad set is_delete = 1, operator = #{operator,jdbcType=VARCHAR} where id = #{id,jdbcType=BIGINT}
+  </delete>
+</mapper>

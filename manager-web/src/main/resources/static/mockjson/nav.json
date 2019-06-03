@@ -1,0 +1,46 @@
+[
+  {
+    "title": "PC端配置",
+    "icon": "fa-windows",
+    "spread": false,
+    "children": [
+      {
+        "title": "首页轮播图配置",
+        "url": "/pchomead"
+      }
+    ]
+  },
+  {
+    "title": "M端配置",
+    "icon": "fa-paper-plane",
+    "spread": false,
+    "children": [
+      {
+        "title": "首页轮播图配置",
+        "url": "/mhomead"
+      }
+    ]
+  },
+  {
+    "title": "APP端配置",
+    "icon": "fa-font",
+    "spread": false,
+    "children": [
+      {
+        "title": "启动页广告配置",
+        "url": "/apphomead"
+      }
+    ]
+  },
+  {
+    "title": "设置",
+    "icon": "fa-cog",
+    "spread": false,
+    "children": [
+      {
+        "title": "基本资料",
+        "url": "/userinfo"
+      }
+    ]
+  }
+]

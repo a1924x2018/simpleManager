@@ -1,0 +1,259 @@
+#set($layout = "/templates/home/layout/default.vm")
+
+<table class="layui-hide" id="tbl" lay-filter="tbl"></table>
+
+<script type="text/javascript">
+    //加载所需模块
+    layui.use(['element', 'layer', 'table'], function(){
+        var layer = layui.layer //弹层
+                ,table = layui.table //表格
+                ,form = layui.form //表单
+                ,$ = layui.$;
+
+        //执行一个 table 实例
+        table.render({
+            elem: '#tbl'
+            ,method: 'POST' //解决过滤选项中文乱码
+//            ,height: '635' //宽高不设置默认占满全屏
+            ,defaultToolbar: [] //defaultToolbar: ['filter', 'print', 'exports'] //显示筛选、导出、打印图标
+            ,toolbar: '#toolbar' //开启工具栏.自定义模板
+//            ,size: 'sm' //设定表格尺寸,sm(小尺寸),lg(大尺寸)
+            ,url: '$!rootContextPath.getURI("/json/pchomead/query/list")' //数据接口
+            ,parseData: function(res){ //res即为原始返回的数据
+                if (res.filterWord !== undefined) {
+                    $('#filterWord').val(res.filterWord);
+                }
+            }
+            ,page: { //开启分页
+                layout: ['count', 'prev', 'page', 'next', 'skip', 'limit'] //自定义分页布局
+                ,groups: 3 //显示3个连续页码
+//                ,first: false //不显示首页
+//                ,last: false //不显示尾页
+            }
+//            ,request: {
+//                pageName: 'page', //页码的参数名称,默认:page
+//                limitName: 'limit' //每页数据量的参数名,默认:limit
+//            }
+//            ,response: {
+//                statusName: 'code', //规定数据状态的字段名称,默认:code
+//                statusCode: 0, //规定成功的状态码,默认:0
+//                msgName: 'msg', //规定状态信息的字段名称,默认:msg
+//                countName: 'count', //规定数据总数的字段名称,默认:count
+//                dataName: 'data' //规定数据列表的字段名称,默认:data
+//            }
+//            ,where{ //额外的请求参数
+//                param1: 'test',
+//                param2: 123
+//            }
+//            ,totalRow: true //开启合计行
+            ,limits:[20,50,100] //每页条数的选择项
+            ,limit: 20 //默认每页的记录数量
+            ,loading: false //显示加载条,默认:true
+            ,cols: [[ //表头
+//                {type: 'checkbox', fixed: 'left'},
+                {field: 'id', title: '编号', width:65, fixed: 'left'}
+                ,{field: 'imageUrl', title: '图片地址'}
+                ,{field: 'linkUrl', title: '链接地址'}
+                ,{field: 'remark', title: '描述'}
+                ,{field: 'gmtStart', title: '开始时间', templet: '#gmtStartTpl'}
+                ,{field: 'gmtEnd', title: '结束时间', templet: '#gmtEndTpl'}
+                ,{field: 'gmtModified', title: '更新时间'}
+                ,{field: 'operator', title: '最后操作'}
+                ,{field: 'status', title:'上线状态', width:95, align: 'center', templet: '#statusTpl', unresize: true}
+                ,{fixed: 'right', title: '操作', width: 165, align:'center', unresize: true, toolbar: '#barDemo'}
+            ]]
+            ,done: function(res, curr, count){
+                // 执行表格初始化的回调函数，可以绑定事件等
+//                $('th').css({'background-color': '#CCCCCC', 'color': '#fff', 'font-weight':'bold'})
+            }
+            ,id: 'listTable'
+        });
+
+        //自定义对象
+        var active = {
+            //表格重载函数
+            tableReload : function(){
+                table.reload('listTable',{
+                    page: {
+                        curr: 1 //重新从第1页开始
+                    }
+                    ,where: {
+                        filterWord: $("input[type='text'][name='filterWord']").val() //参数
+                    }
+                });
+            }
+//            ,getIds : function (data) {
+//                var ids = new Array();
+//                $.map(data, function (row) {
+//                    ids.push(row.openId);
+//                });
+//                return ids.join(",")
+//            }
+        };
+
+        //监听头工具栏事件
+        table.on('toolbar(tbl)', function(obj) {
+            var checkStatus = table.checkStatus(obj.config.id)
+                    ,data = checkStatus.data; //获取选中的数据
+            switch(obj.event) {
+                case 'add':
+                    window.location = '$!rootContextPath.getURI("/pchomead/add")';
+                    break;
+//                case 'edit':
+//                    if(data.length === 0) {
+//                        layer.msg('请选择一行');
+//                    } else if(data.length > 1) {
+//                        layer.msg('只能同时编辑一个');
+//                    } else {
+//                        layer.alert('编辑 [id]：'+ checkStatus.data[0].id);
+//                    }
+//                    break;
+//                case 'delete':
+//                    if(data.length === 0) {
+//                        layer.msg('请选择一行');
+//                    } else {
+//                        layer.msg('删除');
+//                    }
+//                    break;
+                case 'search':
+                    active['tableReload']();//根据查询条件，重新加载表格
+                    break;
+            };
+        });
+
+        //监听行工具事件
+        table.on('tool(tbl)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                    ,layEvent = obj.event; //获得 lay-event 对应的值
+            if(layEvent === 'detail') {
+//                layer.msg('查看操作');
+                window.location = '$!rootContextPath.getURI("/pchomead/view/")' + data.id;
+            } else if(layEvent === 'del') {
+                layer.confirm('真的删除行么', function(index) {
+                    //loading
+                    layer.load(2);
+                    //setTimeout(function () {
+                        $.ajax({
+                            url: '$!rootContextPath.getURI("/json/pchomead/delete")',
+                            //在发送请求之前调用
+                            beforeSend: function (request) {
+                                request.setRequestHeader('IsAjax', 'true');
+                            },
+                            dataType: 'json',
+                            method: 'POST',
+                            data: {
+                                id: data.id
+                            },
+                            error: function (xhr, err, msg) {
+                                layer.msg('请求失败');
+                            },
+                            success: function (res) {
+                                if (res.code == '0') {
+                                    obj.del(); //删除对应行(tr)的DOM结构
+                                    layer.msg('操作成功');
+                                } else {
+                                    layer.msg('请求错误');
+                                }
+                            },
+                            //请求完成后回调函数(请求成功或失败之后均调用)
+                            complete: function (xhr, statusCode) {
+                                //关闭loading
+                                layer.closeAll('loading');
+                                layer.close(index);
+                                //更新全部
+                                form.render();
+                            }
+                        });
+                    //}, 2000);
+                });
+            } else if(layEvent === 'edit') {
+//                layer.msg('编辑操作');
+                window.location = '$!rootContextPath.getURI("/pchomead/edit/")' + data.id;
+            }
+        });
+
+        //监听在线状态操作
+        form.on('switch(statusFilter)', function(obj) {
+            var id = $(obj.elem).parents('tr').first().find('td').eq(0).text();
+            var value = obj.elem.checked ? "0" : "1";
+            layer.confirm('确定要'+(obj.elem.checked? '上线': '下线')+'吗？', {
+                btn: ['确定', '取消']
+                ,closeBtn : 0
+            }, function (index, layero) { //按钮一的回调
+                //loading
+                layer.load(2);
+                //setTimeout(function () {
+                    $.ajax({
+                        url: '$!rootContextPath.getURI("/json/pchomead/status/edit")',
+                        //在发送请求之前调用
+                        beforeSend: function (request) {
+                            request.setRequestHeader('IsAjax', 'true');
+                        },
+                        dataType: 'json',
+                        method: 'POST',
+                        data: {
+                            value: value,
+                            id: id
+                        },
+                        error: function (xhr, err, msg) {
+                            layer.msg('请求失败');
+                            //阻止选择态变更
+                            obj.elem.checked = !(obj.elem.checked);
+                        },
+                        success: function (res) {
+                            if (res.code == '0') {
+                                layer.msg('操作成功');
+                            } else {
+                                layer.msg('请求错误');
+                            }
+                        },
+                        //请求完成后回调函数(请求成功或失败之后均调用)
+                        complete: function (xhr, statusCode) {
+                            //关闭loading
+                            layer.closeAll('loading');
+                            layer.close(index);
+                            //更新全部
+                            form.render();
+                        }
+                    });
+                //}, 2000);
+            }, function (index) { //按钮二的回调
+                //阻止选择态变更
+                obj.elem.checked = !(obj.elem.checked);
+                //更新全部
+                form.render();
+            });
+        });
+    });
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script type="text/html" id="toolbar">
+    <button class="layui-btn" lay-event="add">添加</button>
+    <div class="layui-form-item" style="margin:0;float:right;">
+        <div class="layui-input-inline" style="width:280px">
+            <input type="text" id="filterWord" name="filterWord" placeholder="按ID精确查询 || 按描述模糊查询..." autocomplete="off"
+                   class="layui-input" style="font-size:13px;">
+        </div>
+        <div class="layui-form-label" style="padding:0;">
+            <button class="layui-btn" lay-event="search" lay-submit>查询</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="gmtStartTpl">
+    {{ d.gmtStart == null ? '-' : d.gmtStart }}
+</script>
+
+<script type="text/html" id="gmtEndTpl">
+    {{ d.gmtEnd == null ? '-' : d.gmtEnd }}
+</script>
+
+<script type="text/html" id="statusTpl">
+    <input type="checkbox" name="status" value="{{d.status}}" lay-skin="switch" lay-text="在线|下线" lay-filter="statusFilter" {{ d.status == 0 ? 'checked' : '' }}>
+</script>
