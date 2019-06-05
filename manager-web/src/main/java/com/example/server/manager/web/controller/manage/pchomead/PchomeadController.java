@@ -2,6 +2,7 @@ package com.example.server.manager.web.controller.manage.pchomead;
 
 import com.example.server.manager.common.enums.ResultEnum;
 import com.example.server.manager.common.protocol.ActionResult;
+import com.example.server.manager.common.util.ApiValidator;
 import com.example.server.manager.common.util.ResultTool;
 import com.example.server.manager.common.util.TemplateTool;
 import com.example.server.manager.dao.mysql.domain.Pchomead;
@@ -9,7 +10,7 @@ import com.example.server.manager.service.pchomead.PchomeadService;
 import com.example.server.manager.web.controller.base.BaseController;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
 
 @Controller
@@ -87,23 +89,26 @@ public class PchomeadController extends BaseController {
                                  Pchomead pchomead) {
         try {
             prepare(request, response);
-            if (pchomead == null) {
-                return ResultTool.error(ResultEnum.PARAM_ERROR, "pchomead must be filled");
-            }
-            if (pchomead.getImageUrl() == null) {
-                return ResultTool.error(ResultEnum.PARAM_ERROR, "imageUrl must be filled");
+
+            String validator = ApiValidator.notEmptyValidator(new HashMap<String, Object>() {
+                {
+                    put("pchomead", pchomead);
+                    put("imageUrl", pchomead.getImageUrl());
+                    put("operator", pchomead.getOperator());
+                }
+            });
+            if (StringUtils.isNotBlank(validator)) {
+                return ResultTool.error(ResultEnum.PARAM_ERROR, validator);
             }
             if (pchomead.getImageUrl().length() > 255) {
                 return ResultTool.error(ResultEnum.PARAM_ERROR.getCode(), "imageUrlLengthError");
-            }
-            if (pchomead.getOperator() == null) {
-                return ResultTool.error(ResultEnum.PARAM_ERROR, "operator must be filled");
             }
             if (pchomead.getGmtStart() != null && pchomead.getGmtEnd() != null) {
                 if (pchomead.getGmtEnd().compareTo(pchomead.getGmtStart()) <= 0) {
                     return ResultTool.error(ResultEnum.PARAM_ERROR.getCode(), "gmtError");
                 }
             }
+
             pchomead.setImageUrl(pchomead.getImageUrl().replace(domain, ""));
             if (pchomeadService.createPchomead(pchomead)) {
                 return ResultTool.success();
@@ -151,23 +156,26 @@ public class PchomeadController extends BaseController {
                                Pchomead pchomead) {
         try {
             prepare(request, response);
-            if (pchomead == null) {
-                return ResultTool.error(ResultEnum.PARAM_ERROR, "pchomead must be filled");
-            }
-            if (pchomead.getImageUrl() == null) {
-                return ResultTool.error(ResultEnum.PARAM_ERROR, "imageUrl must be filled");
+
+            String validator = ApiValidator.notEmptyValidator(new HashMap<String, Object>() {
+                {
+                    put("pchomead", pchomead);
+                    put("imageUrl", pchomead.getImageUrl());
+                    put("operator", pchomead.getOperator());
+                }
+            });
+            if (StringUtils.isNotBlank(validator)) {
+                return ResultTool.error(ResultEnum.PARAM_ERROR, validator);
             }
             if (pchomead.getImageUrl().length() > 255) {
                 return ResultTool.error(ResultEnum.PARAM_ERROR.getCode(), "imageUrlLengthError");
-            }
-            if (pchomead.getOperator() == null) {
-                return ResultTool.error(ResultEnum.PARAM_ERROR, "operator must be filled");
             }
             if (pchomead.getGmtStart() != null && pchomead.getGmtEnd() != null) {
                 if (pchomead.getGmtEnd().compareTo(pchomead.getGmtStart()) <= 0) {
                     return ResultTool.error(ResultEnum.PARAM_ERROR.getCode(), "gmtError");
                 }
             }
+
             if (pchomeadService.updatePchomead(pchomead)) {
                 return ResultTool.success();
             }
